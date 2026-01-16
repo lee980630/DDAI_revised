@@ -52,8 +52,8 @@ model_path=Qwen/Qwen2.5-VL-7B-Instruct
 # 배치 크기 설정
 # - train_batch_size: 원본 프롬프트 수
 # - n_agent: 프롬프트당 생성할 응답 수
-train_batch_size=32
-ppo_mini_batch_size=8
+train_batch_size=16
+ppo_mini_batch_size=4
 ppo_micro_batch_size_per_gpu=1
 log_prob_micro_batch_size_per_gpu=1
 n_agent=1
@@ -100,7 +100,8 @@ CONFIG_PATH="$PROJECT_DIR/examples/sglang_multiturn/config"
 TRAIN_DATA="$HOME/data/rag/slidevqa_train_6667.parquet"
 VAL_DATA="$HOME/data/rag/overall_test_crop.parquet"
 
-TOOL_CONFIG="$CONFIG_PATH/tool_config/search_tool_config.yaml"
+#TOOL_CONFIG="$CONFIG_PATH/tool_config/search_tool_config.yaml"
+#actor_rollout_ref.rollout.multi_turn.tool_config_path="$TOOL_CONFIG" \
 
 
 
@@ -109,7 +110,7 @@ python3 -m verl.trainer.main_ppo \
     --config-name='search_multiturn_grpo' \
     algorithm.adv_estimator=grpo \
     data.train_batch_size=$train_batch_size \
-    data.val_batch_size=256 \
+    data.val_batch_size=32 \
     data.max_prompt_length=256 \
     data.max_response_length=2048 \
     data.filter_overlong_prompts=True \
@@ -128,11 +129,10 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
     actor_rollout_ref.actor.fsdp_config.param_offload=False \
     actor_rollout_ref.actor.fsdp_config.optimizer_offload=False \
-    actor_rollout_ref.rollout.max_model_len=15000 \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=$log_prob_micro_batch_size_per_gpu \
     actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
     actor_rollout_ref.rollout.name=sglang \
-    actor_rollout_ref.rollout.gpu_memory_utilization=0.5 \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.6 \
     actor_rollout_ref.rollout.n=$n_agent \
     actor_rollout_ref.rollout.multi_turn.max_assistant_turns=$max_turns \
     actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=$log_prob_micro_batch_size_per_gpu \
@@ -149,7 +149,6 @@ python3 -m verl.trainer.main_ppo \
     trainer.test_freq=50 \
     data.train_files="$TRAIN_DATA" \
     data.val_files="$VAL_DATA"  \
-    actor_rollout_ref.rollout.multi_turn.tool_config_path="$TOOL_CONFIG" \
     trainer.total_epochs=1 \
     \
     data.image_key=images \

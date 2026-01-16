@@ -9,3 +9,11 @@ python examples/data_preprocess/preprocess_search_r1_dataset.py --hf_repo_id Pet
 clear
 bash ./search_r1_like/run_qwen2.5-3b_instruct_search_multiturn.sh 
 clear
+clear
+ls
+exit
+clear
+bash ./search_r1_like/run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash ./search_r1_like/run_qwen2.5-3b_instruct_search_multiturn.sh 
+exit
