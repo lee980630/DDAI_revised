@@ -28,7 +28,7 @@ export UNIFIED_LOG_WRITER_FLUSH_INTERVAL_S=2.0
 export UVLOOP_AUTO=0
 
 n_gpus=4
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=4,5,6,7
 
 # Ray 임시 디렉토리 설정 (AF_UNIX 경로 길이 제한 107바이트 대응)
 mkdir -p /tmp/ray_$USER
@@ -115,7 +115,7 @@ python3 -m verl.trainer.main_ppo \
     data.train_batch_size=$train_batch_size \
     data.val_batch_size=32 \
     data.max_prompt_length=256 \
-    data.max_response_length=2048 \
+    data.max_response_length=16384 \
     data.filter_overlong_prompts=True \
     data.truncation='error' \
     data.return_raw_chat=True \

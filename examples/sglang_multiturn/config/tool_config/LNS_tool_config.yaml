@@ -9,7 +9,7 @@ tools:
       retrieval_service_url: http://163.239.28.21:5002/search
       num_workers: 10
       timeout: 30
-      local_image_root: ./search_engnie/corpus/img
+      local_image_root: ./search_engine/corpus/img
     tool_schema:
       type: function
       function:

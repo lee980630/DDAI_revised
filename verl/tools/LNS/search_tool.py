@@ -2,7 +2,6 @@ import logging
 import asyncio
 import aiohttp
 import os
-import json #디버깅
 from PIL import Image
 from typing import Any
 from verl.tools.base_tool import BaseTool
@@ -19,7 +18,7 @@ class SearchTool(BaseTool):
         # 프로젝트 루트 경로 계산 (search_tool.py 기준으로 상위 4단계)
         self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         # 이미지 파일의 로컬 루트 경로 (config에서 상대 경로로 설정 가능)
-        local_image_root = config.get("local_image_root", "./search_engnie/corpus/img")
+        local_image_root = config.get("local_image_root", "./search_engine/corpus/img")
         # 상대 경로면 프로젝트 루트 기준으로 절대 경로로 변환
         if local_image_root.startswith("./"):
             self.local_image_root = os.path.join(self.project_root, local_image_root[2:])
@@ -51,8 +50,6 @@ class SearchTool(BaseTool):
         numeric_id = sample_id.split("_")[-1] if sample_id else None
         payload = [{"query": query, "request_idx": 0, "id": numeric_id}]
 
-        print(f"\n🚀 [SearchTool Request] ID: {sample_id} -> {numeric_id} | Query: {query}", flush=True) # [DEBUG] 요청 내용 확인
-
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(self.url, json=payload, timeout=self.timeout) as resp:
@@ -62,9 +59,6 @@ class SearchTool(BaseTool):
                         return ToolResponse(text=f"Error: {resp.status}")
 
                     results = await resp.json()
-                    # ⭐️ [DEBUG] 서치엔진 응답 원본 확인 (가장 중요한 부분)
-                    # 서버가 실제로 뭘 줬는지 눈으로 확인해야 합니다.
-                    print(f"📥 [SearchTool Raw Response]:\n{json.dumps(results, indent=2, ensure_ascii=False)}", flush=True)
 
                     text_content = "No search results found."
                     images_found = []
@@ -109,7 +103,6 @@ class SearchTool(BaseTool):
                                             img_obj = Image.open(final_path).convert("RGB")
                                             images_found.append(img_obj)
                                             image_paths_found.append(final_path)
-                                            print(f"✅ [SearchTool] Selected first non-duplicate image: {final_path}", flush=True)
                                             break  # 첫 번째 유효 이미지를 찾으면 즉시 종료
                                         except Exception as e:
                                             logger.warning(f"Failed to load image {final_path}: {e}")
@@ -135,13 +128,19 @@ class SearchTool(BaseTool):
             return ToolResponse(text=f"Error: An unexpected error occurred. {str(e)}") # 1개 값 반환
 
     def _format_results(self, result_data: Any) -> str:
-        # (기존 포맷팅 로직 유지)
+        """Format search results for model consumption."""
         if isinstance(result_data, dict) and 'results' in result_data:
             result_list = result_data['results']
             snippets = []
             for idx, item in enumerate(result_list[:self.k]):
-                title = item.get("title", "No Title")
-                content = item.get("text", item.get("snippet", str(item)))
-                snippets.append(f"[{idx+1}] Title: {title}\nContent: {content}")
-            return "\n\n".join(snippets)
+                # Extract image filename from path (e.g., "./search_engine/corpus/img/14_18.jpg" -> "14_18.jpg")
+                image_file = item.get("image_file", "")
+                if image_file:
+                    image_name = os.path.basename(image_file)
+                    snippets.append(f"[{idx+1}] {image_name}")
+                else:
+                    # Fallback to text/snippet if no image
+                    content = item.get("text", item.get("snippet", str(item)))
+                    snippets.append(f"[{idx+1}] {content}")
+            return "\n".join(snippets)
         return str(result_data)
