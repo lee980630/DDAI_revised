@@ -72,3 +72,43 @@ clear
 bash run_qwen2.5-3b_instruct_search_multiturn.sh 
 ㄷ턋
 exit
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+ 
+ckear
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+clear
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+ckear
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+exit
+clear
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+clear
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+bash run_qwen2.5-3b_instruct_search_multiturn.sh 
+exit

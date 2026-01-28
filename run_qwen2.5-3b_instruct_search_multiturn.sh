@@ -68,6 +68,10 @@ search_url="http://163.239.28.21:5002/search"
 # 이미지 경로 설정 (프로젝트 루트 기준 상대 경로)
 local_image_root="./search_engine/corpus/img"
 
+#Total max response length
+single_turn_max_response_length=2048
+total_max_response_length=$((single_turn_max_response_length * max_turns))
+
 # =============================================================================
 # 3. 로그 디렉토리 생성
 # =============================================================================
@@ -115,7 +119,7 @@ python3 -m verl.trainer.main_ppo \
     data.train_batch_size=$train_batch_size \
     data.val_batch_size=32 \
     data.max_prompt_length=256 \
-    data.max_response_length=16384 \
+    data.max_response_length=$total_max_response_length \
     data.filter_overlong_prompts=True \
     data.truncation='error' \
     data.return_raw_chat=True \

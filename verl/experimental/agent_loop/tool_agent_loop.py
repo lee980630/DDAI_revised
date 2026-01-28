@@ -329,7 +329,7 @@ class ToolAgentLoop(AgentLoopBase):
             response_logprobs=agent_data.response_logprobs[: self.response_length]
             if agent_data.response_logprobs
             else None,
-            num_turns=agent_data.tool_turns,
+            num_turns=agent_data.assistant_turns,
             metrics=agent_data.metrics,
             extra_fields={},
         )
@@ -352,7 +352,7 @@ class ToolAgentLoop(AgentLoopBase):
                 "sample_id": agent_data.sample_id,
                 "agent_id": agent_data.agent_index,
                 "response": response_text,
-                "num_turns": agent_data.tool_turns,
+                "num_turns": agent_data.assistant_turns,
                 "terminated": True,
                 "termination_reason": agent_data.termination_reason,
                 "ndcg_details": {
@@ -402,8 +402,7 @@ class ToolAgentLoop(AgentLoopBase):
         if output.routed_experts is not None:
             agent_data.routed_experts = output.routed_experts
 
-        # Extract tool calls FIRST (before termination check)
-        # This ensures that tool calls at the end of response are still executed
+        # Extract tool calls
         _, agent_data.tool_calls = await self.tool_parser.extract_tool_calls(agent_data.response_ids)
         if agent_data.tool_calls:
             agent_data.tool_turns += 1
@@ -416,15 +415,16 @@ class ToolAgentLoop(AgentLoopBase):
             add_messages.append({"role": "assistant", "content": assistant_message})
             agent_data.messages.extend(add_messages)
 
-        # If tool calls exist, process them even if termination conditions are met
-        # This ensures bbox/search calls at the end are executed before termination
-        if agent_data.tool_calls:
-            return AgentState.PROCESSING_TOOLS
-
-        # Check termination conditions only if no tool calls
+        # Check response_length termination (this must be checked before tool processing)
         if not ignore_termination and len(agent_data.response_mask) >= self.response_length:
             self._set_termination_reason(agent_data, "response_length")
             return AgentState.TERMINATED
+
+        # If tool calls exist, process them first (termination check after tool execution)
+        if agent_data.tool_calls:
+            return AgentState.PROCESSING_TOOLS
+
+        # No tool calls - check other termination conditions
         if self.max_assistant_turns and agent_data.assistant_turns >= self.max_assistant_turns:
             self._set_termination_reason(agent_data, "max_assistant_turns")
             return AgentState.TERMINATED
@@ -462,16 +462,6 @@ class ToolAgentLoop(AgentLoopBase):
 
         with simple_timer("tool_calls", agent_data.metrics):
             responses = await asyncio.gather(*tasks)
-
-        # [DEBUG] Tool response image 상태 확인
-        for i, (tool_name, tool_response) in enumerate(zip(tool_call_names, responses)):
-            img_field = tool_response.image
-            print(f"[DEBUG] Tool '{tool_name}' response: image={img_field}, type={type(img_field)}")
-            if img_field is not None and len(img_field) > 0:
-                print(f"[DEBUG] Tool '{tool_name}' image len={len(img_field)}, contents={[type(x).__name__ if x is not None else 'None' for x in img_field]}")
-                # [None] 감지 시 경고
-                if any(x is None for x in img_field):
-                    print(f"[DEBUG-WARNING] Tool '{tool_name}' returned image list containing None! This will cause IndexError!")
 
         # Process tool responses and update multi_modal_data
         for tool_response in responses:
@@ -523,17 +513,6 @@ class ToolAgentLoop(AgentLoopBase):
                 None, lambda: self.tokenizer.encode(tool_response_text, add_special_tokens=False)
             )
         else:
-            # [DEBUG] 마커와 이미지 개수 비교
-            image_marker_count = sum(
-                1 for msg in add_messages
-                if isinstance(msg.get("content"), list)
-                for item in msg.get("content", [])
-                if isinstance(item, dict) and item.get("type") == "image"
-            )
-            print(f"[DEBUG-FINAL] markers={image_marker_count}, images={len(new_images_this_turn)}")
-            if image_marker_count != len(new_images_this_turn):
-                print(f"[DEBUG-MISMATCH] MISMATCH! add_messages={add_messages}")
-
             response_ids = await self.apply_chat_template(
                 add_messages,
                 images=new_images_this_turn or None,  # Pass None instead of empty list
@@ -559,6 +538,15 @@ class ToolAgentLoop(AgentLoopBase):
         if agent_data.response_logprobs:
             agent_data.response_logprobs += [0.0] * len(response_ids)
         agent_data.user_turns += 1
+
+        # Check termination conditions after tool execution (before next generation)
+        if self.max_assistant_turns and agent_data.assistant_turns >= self.max_assistant_turns:
+            self._set_termination_reason(agent_data, "max_assistant_turns")
+            return AgentState.TERMINATED
+        if self.max_user_turns and agent_data.user_turns >= self.max_user_turns:
+            self._set_termination_reason(agent_data, "max_user_turns")
+            return AgentState.TERMINATED
+
         return AgentState.GENERATING
 
     async def _handle_interacting_state(self, agent_data: AgentData) -> AgentState:
