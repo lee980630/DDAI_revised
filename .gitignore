@@ -9,18 +9,19 @@
 **/outputs/
 
 # === 2. Data & Logs (Project Specific) ===
-**/data/
+/data/
+/agent_crops/
+/search_engine/corpus/
 
 **/logs/
 **/wandb/
 *.jsonl
 *.parquet
 *.tar.gz
-*.jpg
 wget-log
 output.txt
 # === 3. Python & Environment ===
-LNS/
+/LNS/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -29,6 +30,13 @@ __pycache__/
 venv/
 .venv/
 ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
 build/
 dist/
 *.egg-info/
@@ -41,7 +49,6 @@ dist/
 .ipynb_checkpoints/
 .DS_Store
 *.swp
-*.lock
 
 # === 5. Server/Compute Specific (Triton, GPU) ===
 .triton/
