@@ -10,7 +10,7 @@
 
 # === 2. Data & Logs (Project Specific) ===
 **/data/
-**/dataset/
+
 **/logs/
 **/wandb/
 *.jsonl
@@ -19,8 +19,8 @@
 *.jpg
 wget-log
 output.txt
-
 # === 3. Python & Environment ===
+LNS/
 __pycache__/
 *.py[cod]
 *$py.class
