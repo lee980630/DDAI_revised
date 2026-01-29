@@ -36,7 +36,7 @@ export TMPDIR=/tmp/ray_$USER
 export RAY_TMPDIR=/tmp/ray_$USER
 
 # WandB 설정
-export WANDB_API_KEY='8d955a8fe09693b7a2e983616a79aae912307d79'
+export WANDB_API_KEY=$WANDB_API_KEY
 export WANDB_PROJECT='gspo_phase1_revised'
 
 export SGL_DISABLE_TP_MEMORY_INBALANCE_CHECK=True

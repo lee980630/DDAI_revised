@@ -155,3 +155,19 @@ __pycache__/
 
 # --- Large Data ---
 data/rag/.dotnet/
+
+
+
+# --- Additional Model Weights ---
+# PyTorch 및 HuggingFace 모델 가중치 (현재 .pt, .ckpt만 있음)
+*.pth
+*.safetensors
+*.bin
+*.h5
+
+# --- Data & Logs ---
+# 스크립트에서 로그 포맷으로 사용하는 확장자
+*.jsonl
+
+# 봇이 지적한 .dotnet 폴더 (경로 상관없이 전체 무시)
+.dotnet/
