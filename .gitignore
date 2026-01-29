@@ -21,7 +21,6 @@
 wget-log
 output.txt
 # === 3. Python & Environment ===
-/LNS/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -60,3 +59,16 @@ dist/
 # === 6. Project Specific Trash ===
 **/playground/
 .dotnet/
+# === 7. User Specific & Security (Recommended) ===
+.local/             # 사용자 로컬 라이브러리 및 바이너리 (매우 중요)
+.gitconfig          # 개인 Git 설정 파일
+.gnupg/             # GPG 보안 키 관련 폴더
+.bash_history       # 터미널 명령어 기록
+.bashrc             # 개인 쉘 설정
+.profile            # 시스템 프로필
+
+# === 8. Research Specific (Optional) ===
+# VLM이나 RAG 작업 시 생성되는 임시 캐시가 있다면 추가하세요
+.nv/                # NVIDIA 캐시 폴더
+.triton/            # Triton 컴파일 캐시 (기존에 있었으나 재확인)
+.ssh/
